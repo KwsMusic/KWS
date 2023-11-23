@@ -1,3 +1,9 @@
+#
+# Copyright (C) 2021-2022 by Alexa_Help@ Github, < https://github.com/TheTeamAlexa>.
+# A Powerful Music Bot Property Of Rocks Indian Largest Chatting Group
+# All rights reserved. © Alone © Alexa © Yukki
+
+
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardMarkup, Message
 
@@ -5,13 +11,14 @@ import config
 from config import BANNED_USERS
 from strings import get_command
 from ShizukaXMusic import YouTube, app
-from ShizukaXMusic.core.call import Shizuka
+from ShizukaXMusic.core.call import Alexa
 from ShizukaXMusic.misc import db
 from ShizukaXMusic.utils.database import get_loop
 from ShizukaXMusic.utils.decorators import AdminRightsCheck
 from ShizukaXMusic.utils.inline.play import stream_markup, telegram_markup
 from ShizukaXMusic.utils.stream.autoclear import auto_clean
 from ShizukaXMusic.utils.thumbnails import gen_thumb
+from ShizukaXMusic.utils.theme import check_theme
 
 # Commands
 SKIP_COMMAND = get_command("SKIP_COMMAND")
@@ -52,7 +59,7 @@ async def skip(cli, message: Message, _, chat_id):
                                         ),
                                         disable_web_page_preview=True,
                                     )
-                                    await Shizuka.stop_stream(chat_id)
+                                    await Alexa.stop_stream(chat_id)
                                 except:
                                     return
                                 break
@@ -78,7 +85,7 @@ async def skip(cli, message: Message, _, chat_id):
                     disable_web_page_preview=True,
                 )
                 try:
-                    return await Shizuka.stop_stream(chat_id)
+                    return await Alexa.stop_stream(chat_id)
                 except:
                     return
         except:
@@ -87,25 +94,29 @@ async def skip(cli, message: Message, _, chat_id):
                     _["admin_10"].format(message.from_user.first_name),
                     disable_web_page_preview=True,
                 )
-                return await Shizuka.stop_stream(chat_id)
+                return await Alexa.stop_stream(chat_id)
             except:
                 return
     queued = check[0]["file"]
     title = (check[0]["title"]).title()
     user = check[0]["by"]
+    theme = await check_theme(chat_id)
+    user_id = message.from_user.id
     streamtype = check[0]["streamtype"]
     videoid = check[0]["vidid"]
+    duration_min = check[0]["dur"]
     status = True if str(streamtype) == "video" else None
     if "live_" in queued:
         n, link = await YouTube.video(videoid, True)
         if n == 0:
             return await message.reply_text(_["admin_11"].format(title))
         try:
-            await Shizuka.skip_stream(chat_id, link, video=status)
+            await Alexa.skip_stream(chat_id, link, video=status)
         except Exception:
             return await message.reply_text(_["call_9"])
+        theme = await check_theme(chat_id)
         button = telegram_markup(_, chat_id)
-        img = await gen_thumb(videoid)
+        img = await gen_thumb(videoid, user_id, theme)
         run = await message.reply_photo(
             photo=img,
             caption=_["stream_1"].format(
@@ -128,16 +139,19 @@ async def skip(cli, message: Message, _, chat_id):
         except:
             return await mystic.edit_text(_["call_9"])
         try:
-            await Shizuka.skip_stream(chat_id, file_path, video=status)
+            await Alexa.skip_stream(chat_id, file_path, video=status)
         except Exception:
             return await mystic.edit_text(_["call_9"])
+        theme = await check_theme(chat_id)
         button = stream_markup(_, videoid, chat_id)
-        img = await gen_thumb(videoid)
+        img = await gen_thumb(videoid, user_id, theme)
         run = await message.reply_photo(
             photo=img,
             caption=_["stream_1"].format(
-                user,
+                title[:27],
                 f"https://t.me/{app.username}?start=info_{videoid}",
+                duration_min,
+                user,
             ),
             reply_markup=InlineKeyboardMarkup(button),
         )
@@ -146,7 +160,7 @@ async def skip(cli, message: Message, _, chat_id):
         await mystic.delete()
     elif "index_" in queued:
         try:
-            await Shizuka.skip_stream(chat_id, videoid, video=status)
+            await Alexa.skip_stream(chat_id, videoid, video=status)
         except Exception:
             return await message.reply_text(_["call_9"])
         button = telegram_markup(_, chat_id)
@@ -159,7 +173,7 @@ async def skip(cli, message: Message, _, chat_id):
         db[chat_id][0]["markup"] = "tg"
     else:
         try:
-            await Shizuka.skip_stream(chat_id, queued, video=status)
+            await Alexa.skip_stream(chat_id, queued, video=status)
         except Exception:
             return await message.reply_text(_["call_9"])
         if videoid == "telegram":
@@ -185,13 +199,16 @@ async def skip(cli, message: Message, _, chat_id):
             db[chat_id][0]["mystic"] = run
             db[chat_id][0]["markup"] = "tg"
         else:
+            theme = await check_theme(chat_id)
             button = stream_markup(_, videoid, chat_id)
-            img = await gen_thumb(videoid)
+            img = await gen_thumb(videoid, user_id, theme)
             run = await message.reply_photo(
                 photo=img,
                 caption=_["stream_1"].format(
-                    user,
+                    title[:27],
                     f"https://t.me/{app.username}?start=info_{videoid}",
+                    duration_min,
+                    user,
                 ),
                 reply_markup=InlineKeyboardMarkup(button),
             )
