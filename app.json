@@ -1,7 +1,7 @@
 {
-    "name": "BRANDED SHIZUKA  BOT",
+    "name": "༄ᵒ᭄☯︎Asʜɪsʜ乂GUPTA࿐ 🎟️",
     "description": "Shizuka Is A Telegram Telegram Group Calls streaming bot with some useful features, written in Python with Pyrogram and Py-Tgcalls.",
-    "logo": "https://te.legra.ph/file/90e709718e7dac641aaf7.jpg",
+    "logo": "https://i.postimg.cc/QMt2kYS5/20231117-233101.png",
     "keywords": [
     "python3",
     "telegram",
@@ -55,12 +55,12 @@
       },
       "SUPPORT_GROUP": {
         "description": "Your Support Group link ",
-        "value": "https://t.me/BRANDED_LINK",
+        "value": "https://t.me/MUSICBOT_OWNER",
         "required": false
       },
       "SUPPORT_CHANNEL": {
         "description": "Your Updates Channel link",
-        "value": "https://t.me/BRANDRD_21",
+        "value": "https://t.me/BWF_MUSIC1",
         "required": false
       },
       "PING_IMG_URL": {
@@ -90,7 +90,7 @@
       },
       "UPSTREAM_REPO": {
         "description": "If you dont know this, Leave as it is",
-        "value": "https://github.com/WCGKING/BRANDEDXSHIZUKA",
+        "value": "https://github.com/KwsMusic/KWS",
         "required": true
       },
       "UPSTREAM_BRANCH": {
