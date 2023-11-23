@@ -18,7 +18,6 @@ from ShizukaXMusic.utils.decorators import AdminRightsCheck
 from ShizukaXMusic.utils.inline.play import stream_markup, telegram_markup
 from ShizukaXMusic.utils.stream.autoclear import auto_clean
 from ShizukaXMusic.utils.thumbnails import gen_thumb
-from ShizukaXMusic.utils.theme import check_theme
 
 # Commands
 SKIP_COMMAND = get_command("SKIP_COMMAND")
