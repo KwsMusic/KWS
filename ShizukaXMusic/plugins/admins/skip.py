@@ -5,20 +5,24 @@ import config
 from config import BANNED_USERS
 from strings import get_command
 from ShizukaXMusic import YouTube, app
-from ShizukaXMusic.core.call import Shizuka
-from ShizukaXMusic.misc import db
-from ShizukaXMusic.utils.database import get_loop
-from ShizukaXMusic.utils.decorators import AdminRightsCheck
-from ShizukaXMusic.utils.inline.play import stream_markup, telegram_markup
-from ShizukaXMusic.utils.stream.autoclear import auto_clean
-from ShizukaXMusic.utils.thumbnails import gen_thumb
+from ShizukaXMusic.core.call import Aarohi
+from ShizukaXMusic import db
+from ShizukaXMusic.database import get_loop
+from ShizukaXMusic.decorators import AdminRightsCheck
+from ShizukaXMusic.inline.play import (stream_markup,
+                                          telegram_markup)
+from ShizukaXMusic.stream.autoclear import auto_clean
+from ShizukaXMusic.thumbnails import gen_thumb
 
 # Commands
 SKIP_COMMAND = get_command("SKIP_COMMAND")
 
 
 @app.on_message(
-    filters.command(SKIP_COMMAND) & filters.group & ~filters.edited & ~BANNED_USERS
+    filters.command(SKIP_COMMAND)
+    & filters.group
+    & ~filters.edited
+    & ~BANNED_USERS
 )
 @AdminRightsCheck
 async def skip(cli, message: Message, _, chat_id):
@@ -40,24 +44,30 @@ async def skip(cli, message: Message, _, chat_id):
                             try:
                                 popped = check.pop(0)
                             except:
-                                return await message.reply_text(_["admin_16"])
+                                return await message.reply_text(
+                                    _["admin_16"]
+                                )
                             if popped:
-                                if config.AUTO_DOWNLOADS_CLEAR == str(True):
+                                if (
+                                    config.AUTO_DOWNLOADS_CLEAR
+                                    == str(True)
+                                ):
                                     await auto_clean(popped)
                             if not check:
                                 try:
                                     await message.reply_text(
                                         _["admin_10"].format(
                                             message.from_user.first_name
-                                        ),
-                                        disable_web_page_preview=True,
+                                        )
                                     )
-                                    await Shizuka.stop_stream(chat_id)
+                                    await Aarohi.stop_stream(chat_id)
                                 except:
                                     return
                                 break
                     else:
-                        return await message.reply_text(_["admin_15"].format(count))
+                        return await message.reply_text(
+                            _["admin_15"].format(count)
+                        )
                 else:
                     return await message.reply_text(_["admin_14"])
             else:
@@ -74,20 +84,18 @@ async def skip(cli, message: Message, _, chat_id):
                     await auto_clean(popped)
             if not check:
                 await message.reply_text(
-                    _["admin_10"].format(message.from_user.first_name),
-                    disable_web_page_preview=True,
+                    _["admin_10"].format(message.from_user.first_name)
                 )
                 try:
-                    return await Shizuka.stop_stream(chat_id)
+                    return await Aarohi.stop_stream(chat_id)
                 except:
                     return
         except:
             try:
                 await message.reply_text(
-                    _["admin_10"].format(message.from_user.first_name),
-                    disable_web_page_preview=True,
+                    _["admin_10"].format(message.from_user.first_name)
                 )
-                return await Shizuka.stop_stream(chat_id)
+                return await Aarohi.stop_stream(chat_id)
             except:
                 return
     queued = check[0]["file"]
@@ -99,9 +107,11 @@ async def skip(cli, message: Message, _, chat_id):
     if "live_" in queued:
         n, link = await YouTube.video(videoid, True)
         if n == 0:
-            return await message.reply_text(_["admin_11"].format(title))
+            return await message.reply_text(
+                _["admin_11"].format(title)
+            )
         try:
-            await Shizuka.skip_stream(chat_id, link, video=status)
+            await Aarohi.skip_stream(chat_id, link, video=status)
         except Exception:
             return await message.reply_text(_["call_9"])
         button = telegram_markup(_, chat_id)
@@ -109,15 +119,19 @@ async def skip(cli, message: Message, _, chat_id):
         run = await message.reply_photo(
             photo=img,
             caption=_["stream_1"].format(
-                user,
+                title[:27],
                 f"https://t.me/{app.username}?start=info_{videoid}",
+                check[0]["dur"],
+                user,
             ),
             reply_markup=InlineKeyboardMarkup(button),
         )
         db[chat_id][0]["mystic"] = run
         db[chat_id][0]["markup"] = "tg"
     elif "vid_" in queued:
-        mystic = await message.reply_text(_["call_10"], disable_web_page_preview=True)
+        mystic = await message.reply_text(
+            _["call_10"], disable_web_page_preview=True
+        )
         try:
             file_path, direct = await YouTube.download(
                 videoid,
@@ -128,7 +142,7 @@ async def skip(cli, message: Message, _, chat_id):
         except:
             return await mystic.edit_text(_["call_9"])
         try:
-            await Shizuka.skip_stream(chat_id, file_path, video=status)
+            await Aarohi.skip_stream(chat_id, file_path, video=status)
         except Exception:
             return await mystic.edit_text(_["call_9"])
         button = stream_markup(_, videoid, chat_id)
@@ -136,8 +150,10 @@ async def skip(cli, message: Message, _, chat_id):
         run = await message.reply_photo(
             photo=img,
             caption=_["stream_1"].format(
-                user,
+                title[:27],
                 f"https://t.me/{app.username}?start=info_{videoid}",
+                check[0]["dur"],
+                user,
             ),
             reply_markup=InlineKeyboardMarkup(button),
         )
@@ -146,7 +162,7 @@ async def skip(cli, message: Message, _, chat_id):
         await mystic.delete()
     elif "index_" in queued:
         try:
-            await Shizuka.skip_stream(chat_id, videoid, video=status)
+            await Aarohi.skip_stream(chat_id, videoid, video=status)
         except Exception:
             return await message.reply_text(_["call_9"])
         button = telegram_markup(_, chat_id)
@@ -159,7 +175,7 @@ async def skip(cli, message: Message, _, chat_id):
         db[chat_id][0]["markup"] = "tg"
     else:
         try:
-            await Shizuka.skip_stream(chat_id, queued, video=status)
+            await Aarohi.skip_stream(chat_id, queued, video=status)
         except Exception:
             return await message.reply_text(_["call_9"])
         if videoid == "telegram":
@@ -168,7 +184,9 @@ async def skip(cli, message: Message, _, chat_id):
                 photo=config.TELEGRAM_AUDIO_URL
                 if str(streamtype) == "audio"
                 else config.TELEGRAM_VIDEO_URL,
-                caption=_["stream_3"].format(title, check[0]["dur"], user),
+                caption=_["stream_3"].format(
+                    title, check[0]["dur"], user
+                ),
                 reply_markup=InlineKeyboardMarkup(button),
             )
             db[chat_id][0]["mystic"] = run
@@ -179,7 +197,9 @@ async def skip(cli, message: Message, _, chat_id):
                 photo=config.SOUNCLOUD_IMG_URL
                 if str(streamtype) == "audio"
                 else config.TELEGRAM_VIDEO_URL,
-                caption=_["stream_3"].format(title, check[0]["dur"], user),
+                caption=_["stream_3"].format(
+                    title, check[0]["dur"], user
+                ),
                 reply_markup=InlineKeyboardMarkup(button),
             )
             db[chat_id][0]["mystic"] = run
@@ -190,8 +210,10 @@ async def skip(cli, message: Message, _, chat_id):
             run = await message.reply_photo(
                 photo=img,
                 caption=_["stream_1"].format(
-                    user,
+                    title[:27],
                     f"https://t.me/{app.username}?start=info_{videoid}",
+                    check[0]["dur"],
+                    user,
                 ),
                 reply_markup=InlineKeyboardMarkup(button),
             )
